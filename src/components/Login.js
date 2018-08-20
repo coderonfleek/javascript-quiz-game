@@ -2,6 +2,9 @@ import React, { Component } from "react";
 import { firestore } from "../firebase";
 import { Link } from "react-router-dom";
 
+import config from "../config";
+import _auth0 from "../services/Auth0Service";
+
 export default class Login extends Component {
   constructor(props) {
     super(props);
@@ -35,6 +38,11 @@ export default class Login extends Component {
         });
       });
   }
+
+  login = e => {
+    _auth0.authorize();
+  };
+
   render() {
     return (
       <div className="container">
@@ -48,9 +56,9 @@ export default class Login extends Component {
               </p>
               <hr className="my-4" />
               <div className="row justify-content-center">
-                <Link className="btn btn-primary btn-lg" to="/quiz">
+                <button className="btn btn-primary btn-lg" onClick={this.login}>
                   Login To Play
-                </Link>
+                </button>
               </div>
             </div>
           </div>
