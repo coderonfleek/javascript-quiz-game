@@ -1,6 +1,8 @@
 import React, { Component } from "react";
 import _auth0 from "../services/Auth0Service";
 import toastr from "toastr";
+import request from "request";
+import config from "../config";
 
 export default class Callback extends Component {
   accessToken;
@@ -27,6 +29,7 @@ export default class Callback extends Component {
     console.log(authResult);
     _auth0.client.userInfo(this.accessToken, (err, profile) => {
       if (profile) {
+        console.log(profile);
         this.beginPlayerSession(authResult);
       } else if (err) {
         console.warn(`Error retrieving profile: ${err.error}`);
@@ -45,7 +48,7 @@ export default class Callback extends Component {
     // Get Firebase token
     this.getFirebaseToken();
     // Redirect to desired route
-    window.location.replace("/quiz");
+    //window.location.replace("/quiz");
   } //beginPlayerSession
 
   getFirebaseToken() {
@@ -68,6 +71,29 @@ export default class Callback extends Component {
           `An error occurred fetching Firebase token: ${err.message}`
         )
     ); */
+
+    if (!this.accessToken) {
+      window.location.replace("/");
+    }
+
+    console.log(this.accessToken);
+
+    var options = {
+      method: "GET",
+      url: `${config.firebaseTokenAPI}auth/firebase`,
+      headers: {
+        "content-type": "application/json",
+        Authorization: `Bearer ${this.accessToken}`
+      },
+      json: true
+    };
+
+    request(options, function(error, response, body) {
+      if (error) throw new Error(error);
+
+      console.log(body);
+      //win.localStorage.setItem(body.id_token);
+    });
   } //getFirebaseToken
 
   render() {

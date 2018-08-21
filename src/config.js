@@ -6,7 +6,8 @@ const config = {
     audience: "http://localhost:1337/",
     redirect: "http://localhost:3000/callback",
     scope: "openid profile email"
-  }
+  },
+  firebaseTokenAPI: "http://localhost:1337/"
 };
 
 export default config;
