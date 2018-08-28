@@ -3,6 +3,7 @@ import _auth0 from "../services/Auth0Service";
 import toastr from "toastr";
 import request from "request";
 import config from "../config";
+import firebase from "../firebase";
 
 export default class Callback extends Component {
   accessToken;
@@ -53,24 +54,6 @@ export default class Callback extends Component {
 
   getFirebaseToken() {
     // Prompt for login if no access token
-    /* if (!this.accessToken) {
-      window.location.replace("/");
-    }
-    const getToken$ = () => {
-      return this.http.get(`${environment.apiRoot}auth/firebase`, {
-        headers: new HttpHeaders().set(
-          "Authorization",
-          `Bearer ${this.accessToken}`
-        )
-      });
-    };
-    this.firebaseSub = getToken$().subscribe(
-      res => this._firebaseAuth(res),
-      err =>
-        console.error(
-          `An error occurred fetching Firebase token: ${err.message}`
-        )
-    ); */
 
     if (!this.accessToken) {
       window.location.replace("/");
@@ -88,13 +71,33 @@ export default class Callback extends Component {
       json: true
     };
 
-    request(options, function(error, response, body) {
+    request(options, (error, response, body) => {
       if (error) throw new Error(error);
 
       console.log(body);
+      this.firebaseAuth(body);
       //win.localStorage.setItem(body.id_token);
     });
   } //getFirebaseToken
+
+  firebaseAuth(tokenObj) {
+    firebase
+      .auth()
+      .signInWithCustomToken(tokenObj.firebaseToken)
+      .then(res => {
+        this.loggedInFirebase = true;
+
+        console.log("Successfully authenticated with Firebase!");
+      })
+      .catch(err => {
+        const errorCode = err.code;
+        const errorMessage = err.message;
+        console.error(
+          `${errorCode} Could not log into Firebase: ${errorMessage}`
+        );
+        this.loggedInFirebase = false;
+      });
+  } //firebaseAuth
 
   render() {
     return <div>Redirecting.....</div>;
