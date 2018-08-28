@@ -29,7 +29,7 @@ export default class Login extends Component {
       .catch(err => {}); */
 
     firestore
-      .collection("questions")
+      .collection("quizscores")
       .get()
       .then(querySnapshot => {
         querySnapshot.forEach(doc => {

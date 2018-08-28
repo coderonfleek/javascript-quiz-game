@@ -1,11 +1,12 @@
 import React, { Component } from "react";
+import { withRouter } from "react-router-dom";
 import _auth0 from "../services/Auth0Service";
 import toastr from "toastr";
 import request from "request";
 import config from "../config";
 import firebase from "../firebase";
 
-export default class Callback extends Component {
+class Callback extends Component {
   accessToken;
   componentDidMount() {
     _auth0.parseHash((err, authResult) => {
@@ -49,7 +50,8 @@ export default class Callback extends Component {
     // Get Firebase token
     this.getFirebaseToken();
     // Redirect to desired route
-    //window.location.replace("/quiz");
+
+    this.props.history.push("/quiz");
   } //beginPlayerSession
 
   getFirebaseToken() {
@@ -75,8 +77,8 @@ export default class Callback extends Component {
       if (error) throw new Error(error);
 
       console.log(body);
+      localStorage.setItem("firebase_token", body.firebaseToken);
       this.firebaseAuth(body);
-      //win.localStorage.setItem(body.id_token);
     });
   } //getFirebaseToken
 
@@ -85,8 +87,6 @@ export default class Callback extends Component {
       .auth()
       .signInWithCustomToken(tokenObj.firebaseToken)
       .then(res => {
-        this.loggedInFirebase = true;
-
         console.log("Successfully authenticated with Firebase!");
       })
       .catch(err => {
@@ -95,7 +95,6 @@ export default class Callback extends Component {
         console.error(
           `${errorCode} Could not log into Firebase: ${errorMessage}`
         );
-        this.loggedInFirebase = false;
       });
   } //firebaseAuth
 
@@ -103,3 +102,12 @@ export default class Callback extends Component {
     return <div>Redirecting.....</div>;
   }
 }
+
+export default withRouter(Callback);
+
+/* export default withRouter(
+  connect(
+    mapStateToProps,
+    mapDispatchToProps
+  )(Callback)
+); */
