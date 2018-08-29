@@ -14,30 +14,7 @@ export default class Login extends Component {
     };
   }
 
-  componentDidMount() {
-    firestore.settings({
-      timestampsInSnapshots: true
-    });
-
-    /* firestore
-      .collection("questions")
-      .add({
-        id: 2,
-        question: "How old are you"
-      })
-      .then(docRef => {})
-      .catch(err => {}); */
-
-    firestore
-      .collection("quizscores")
-      .get()
-      .then(querySnapshot => {
-        querySnapshot.forEach(doc => {
-          //console.log(`${doc.id} => ${doc.data()}`);
-          console.log(doc.data());
-        });
-      });
-  }
+  componentDidMount() {}
 
   login = e => {
     _auth0.authorize();

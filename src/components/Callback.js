@@ -32,6 +32,7 @@ class Callback extends Component {
     _auth0.client.userInfo(this.accessToken, (err, profile) => {
       if (profile) {
         console.log(profile);
+        localStorage.setItem("quiz_player_profile", JSON.stringify(profile));
         this.beginPlayerSession(authResult);
       } else if (err) {
         console.warn(`Error retrieving profile: ${err.error}`);
@@ -58,7 +59,7 @@ class Callback extends Component {
     // Prompt for login if no access token
 
     if (!this.accessToken) {
-      window.location.replace("/");
+      this.props.history.push("/");
     }
 
     console.log(this.accessToken);
@@ -104,10 +105,3 @@ class Callback extends Component {
 }
 
 export default withRouter(Callback);
-
-/* export default withRouter(
-  connect(
-    mapStateToProps,
-    mapDispatchToProps
-  )(Callback)
-); */

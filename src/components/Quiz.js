@@ -3,25 +3,55 @@ import toastr from "toastr";
 
 import questions from "../data/questions";
 import config from "../config";
+import { firestore } from "../firebase";
+import { withRouter } from "react-router-dom";
 
-export default class Quiz extends Component {
+class Quiz extends Component {
   constructor() {
     super();
 
     this.state = {
+      userProfile: JSON.parse(localStorage.getItem("quiz_player_profile")),
+      highScores: null,
       totalScore: 0,
       questionIndex: 0,
       currentQuestion: questions[0],
       selectedAnswer: null,
       gameOver: false
     };
+    console.log(this.state.userProfile);
   }
+
+  componentDidMount() {
+    if (!this.state.userProfile) {
+      this.props.history.push("/");
+    }
+
+    firestore.settings({
+      timestampsInSnapshots: true
+    });
+    //Fetch High Scores with realtime updates
+
+    firestore
+      .collection(config.scoresCollection)
+      .orderBy("score", "desc")
+      .limit(5)
+      .onSnapshot(querySnapshot => {
+        var scores = [];
+        querySnapshot.forEach(function(doc) {
+          scores.push(doc.data());
+        });
+
+        console.log(scores);
+        this.setState({ highScores: scores });
+      });
+  } //componentDidMount
 
   setAnswer = e => {
     this.setState({
       selectedAnswer: e.target.value
     });
-  };
+  }; //setAnswer
 
   submitAnswer = e => {
     if (this.state.selectedAnswer) {
@@ -50,33 +80,46 @@ export default class Quiz extends Component {
             totalScore: finalScore,
             gameOver: true
           });
-          toastr.info(
-            `Game Ended. Your Total Score is ${finalScore}`,
-            "Awesome",
-            {
-              closeButton: true
-            }
-          );
+          this.saveScore(finalScore).then(() => {
+            toastr.info(
+              `Game Ended. Your Total Score is ${finalScore}`,
+              "Awesome",
+              {
+                closeButton: true
+              }
+            );
+          });
         }
       } else {
         //End game
         this.setState({
           gameOver: true
         });
-        toastr.error(
-          `Game Over. Total Score ${this.state.totalScore}`,
-          "Wrong Answer",
-          {
-            closeButton: true
-          }
-        );
+
+        this.saveScore(this.state.totalScore).then(() => {
+          toastr.error(
+            `Game Over. Total Score ${this.state.totalScore}`,
+            "Wrong Answer",
+            {
+              closeButton: true
+            }
+          );
+        });
       }
     } else {
       toastr.error(`No answer selected`, "Error", {
         closeButton: true
       });
     }
-  };
+  }; //submitAnswer
+
+  saveScore(score) {
+    return firestore.collection(config.scoresCollection).add({
+      name: this.state.userProfile.name,
+      email: this.state.userProfile.email,
+      score: score
+    });
+  } //saveScore
 
   render() {
     return (
@@ -128,12 +171,18 @@ export default class Quiz extends Component {
             <div className="card">
               <div className="card-header">High Scores</div>
               <ul className="list-group list-group-flush">
-                <li className="list-group-item">
-                  Cras justo odio{" "}
-                  <span className="badge badge-success float-right">9</span>
-                </li>
-                <li className="list-group-item">Dapibus ac facilisis in</li>
-                <li className="list-group-item">Vestibulum at eros</li>
+                {this.state.highScores
+                  ? this.state.highScores.map(scoreObj => {
+                      return (
+                        <li key={scoreObj.email} className="list-group-item">
+                          {scoreObj.name}
+                          <span className="badge badge-success float-right">
+                            {scoreObj.score}
+                          </span>
+                        </li>
+                      );
+                    })
+                  : ""}
               </ul>
             </div>
           </div>
@@ -142,3 +191,5 @@ export default class Quiz extends Component {
     );
   }
 }
+
+export default withRouter(Quiz);

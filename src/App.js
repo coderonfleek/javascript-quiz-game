@@ -12,23 +12,13 @@ class App extends Component {
   render() {
     return (
       <Router>
-        <div>
-          <ul>
-            <li>
-              <Link to="/">Home</Link>
-            </li>
-            <li>
-              <Link to="/quiz">Quiz</Link>
-            </li>
-            <li>
-              <Link to="/addquestion">Add Question</Link>
-            </li>
-          </ul>
-
-          <Route exact path="/" component={Login} />
-          <Route path="/quiz" component={Quiz} />
-          <Route path="/addquestion" component={AddQuestion} />
-          <Route path="/callback" component={Callback} />
+        <div className="container" id="appContainer">
+          <div className="row">
+            <Route exact path="/" component={Login} />
+            <Route path="/quiz" component={Quiz} />
+            <Route path="/addquestion" component={AddQuestion} />
+            <Route path="/callback" component={Callback} />
+          </div>
         </div>
       </Router>
     );
